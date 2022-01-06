@@ -7,8 +7,9 @@ from src import connection
 
 class InvoiceModel(object):
     """Invoice Model"""
-    def __init__(self, connection, invoice_id, action):
+    def __init__(self, connection, n, invoice_id, action):
         self.connection = connection
+        self.n = n
         self.action = action
         self.invoice_id = invoice_id
         self.fishno = None
@@ -75,8 +76,8 @@ class InvoiceModel(object):
         ]
 
     def done(self):
-        sql = "DELETE FROM MGS WHERE id = ?"
-        query = self.connection.execute(sql, [self.invoice_id])
+        sql = "DELETE FROM MGS WHERE n = ? AND id = ?"
+        query = self.connection.execute(sql, [self.n, self.invoice_id])
         query.clear()
         return True
 
@@ -95,11 +96,11 @@ class InvoiceApp(BaseApp):
         return self._sheet
 
     def get_invoices(self):
-        sql = "SELECT id, act FROM MGS WHERE subject = 1 ORDER BY n"
+        sql = "SELECT n, id, act FROM MGS WHERE subject = 1 ORDER BY n"
         query = self.connection.execute(sql)
         invoices = list()
         while query.next():
-            invoices.append(InvoiceModel(self.connection, query.value(0), query.value(1)))
+            invoices.append(InvoiceModel(self.connection, query.value(0), query.value(1), query.value(2)))
         query.clear()
         return invoices
 
