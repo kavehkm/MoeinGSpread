@@ -1,7 +1,6 @@
-CREATE TABLE Gspread(
+CREATE TABLE MGS(
+    n               BIGINT          NOT NULL        IDENTITY(1,1),
     id              INT             NOT NULL,
-    fishno          INT             NOT NULL,
-    loc             VARCHAR(20)     NOT NULL,
-    is_updated      BIT             NOT NULL    DEFAULT 0,
-    is_deleted      BIT             NOT NULL    DEFAULT 0
+    subject         INT             NOT NULL,
+    act             INT             NOT NULL
 )
