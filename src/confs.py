@@ -14,6 +14,10 @@ SETTINGS_FILE = os.path.join(BASE_DIR, 'settings.json')
 GOOGLE_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.json')
 
 
+# resource dir
+RESOURCE_DIR = os.path.join(BASE_DIR, 'src/ui/resources')
+
+
 # default settings
 DEFAULT_SETTINGS = {
     'database_server': '',
