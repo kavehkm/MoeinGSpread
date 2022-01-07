@@ -105,6 +105,10 @@ class InvoiceApp(BaseApp):
         return invoices
 
     def _do(self):
+        inserted = 0
+        updated = 0
+        deleted = 0
+        report = list()
         for invoice in self.get_invoices():
             # find invoice on sheet
             cell = self.sheet.find(str(invoice.invoice_id), in_column=1)
@@ -114,12 +118,27 @@ class InvoiceApp(BaseApp):
                 # otherwise append new row
                 if cell:
                     self.sheet.update('A{}:K{}'.format(cell.row, cell.row), [invoice.serialize()])
+                    updated += 1
                 else:
                     self.sheet.append_row(invoice.serialize())
+                    inserted += 1
             else:
                 # check for cell if invoice exists, just delete it
                 # otherwise do nothing...
                 if cell:
                     self.sheet.delete_row(cell.row)
+                    deleted += 1
             # remove current invoice from MGS table
             invoice.done()
+        # generate report
+        if inserted:
+            report.append('{} new invoice inserted'.format(inserted))
+        if updated:
+            report.append('{} invoice updated'.format(updated))
+        if deleted:
+            report.append('{} invoice deleted'.format(deleted))
+        if report:
+            return {
+                'title': 'Invoice',
+                'message': '\n'.join(report)
+            }
