@@ -15,6 +15,7 @@ class BaseApp(object):
     def run(self):
         # check for period
         if time() - self._ran > self._interval:
-            self._do()
+            result = self._do()
             # save ran time
             self._ran = time()
+            return result
