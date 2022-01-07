@@ -5,8 +5,8 @@ from src import settings
 from .base import BaseWidget
 from src.apps import InvoiceApp
 # pyqt
-from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtCore import QObject, QThread, QThreadPool, pyqtSignal
+from PyQt5.QtWidgets import QMessageBox, QHBoxLayout, QPushButton, QLabel
+from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 
 
 ##########
@@ -74,17 +74,24 @@ class EngineWidget(BaseWidget):
         self.engine = Engine([
             InvoiceApp(settings.g('invoice_interval'))
         ])
-        self.threadPool = QThreadPool()
 
     def _createWidget(self):
+        # display
+        self.dispaly = QLabel()
+        self.dispaly.setObjectName('Display')
+        self.dispaly.setAlignment(Qt.AlignCenter)
+        self.generalLayout.addWidget(self.dispaly)
         # control
+        self.controlLayout = QHBoxLayout()
+        self.generalLayout.addLayout(self.controlLayout)
         # - start
         self.btnStart = QPushButton('Start')
-        self.generalLayout.addWidget(self.btnStart)
+        self.controlLayout.addWidget(self.btnStart)
         # - stop
         self.btnStop = QPushButton('Stop')
-        self.btnStop.setDisabled(True)
-        self.generalLayout.addWidget(self.btnStop)
+        self.controlLayout.addWidget(self.btnStop)
+        # default state
+        self.engineFinishedHandler()
 
     def _connectSignals(self):
         self.btnStart.clicked.connect(self.start)
@@ -95,6 +102,14 @@ class EngineWidget(BaseWidget):
         self.engine.signals.error.connect(self.engineErrorHandler)
         self.engine.signals.notification.connect(self.engineNotificationHandler)
 
+    def _setStyles(self):
+        self.setStyleSheet("""
+            #Display{
+                font-size: 20px;
+                font-weight: bold;
+            }
+        """)
+
     def start(self):
         self.engine.start()
 
@@ -104,20 +119,26 @@ class EngineWidget(BaseWidget):
     def engineStartedHandler(self):
         self.btnStart.setDisabled(True)
         self.btnStop.setEnabled(True)
+        self.dispaly.setText('Running...')
 
     def engineFinishedHandler(self):
         self.btnStart.setEnabled(True)
         self.btnStop.setDisabled(True)
+        self.dispaly.setText('Stopped.')
 
     def engineConnectingHandler(self):
         self.btnStart.setDisabled(True)
         self.btnStop.setDisabled(True)
+        self.dispaly.setText('Connecting...')
 
     def engineErrorHandler(self, error):
-        print(str(error))
+        # stop engine
+        self.engine.stop()
+        # create and show error message
+        QMessageBox.critical(self, 'Error', str(error))
 
     def engineNotificationHandler(self, title, message):
-        print('Notification: {}: {}'.format(title, message))
+        pass
 
     def networkCheckerTikHandler(self, tik):
         pass
