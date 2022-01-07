@@ -5,7 +5,7 @@ from src import settings
 from .base import BaseWidget
 from src.apps import InvoiceApp
 # pyqt
-from PyQt5.QtWidgets import QMessageBox, QHBoxLayout, QPushButton, QLabel
+from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QLabel
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 
 
@@ -48,7 +48,9 @@ class Engine(QThread):
 
     def _do(self):
         for app in self._apps:
-            app.run()
+            report = app.run()
+            if report:
+                self.signals.notification.emit(report['title'], report['message'])
 
     def run(self):
         # do-while(stopEvent is not set)
@@ -134,11 +136,11 @@ class EngineWidget(BaseWidget):
     def engineErrorHandler(self, error):
         # stop engine
         self.engine.stop()
-        # create and show error message
-        QMessageBox.critical(self, 'Error', str(error))
+        # show notification
+        self.ui.showNotification('ERROR', str(error))
 
     def engineNotificationHandler(self, title, message):
-        pass
+        self.ui.showNotification(title, message)
 
     def networkCheckerTikHandler(self, tik):
         pass
