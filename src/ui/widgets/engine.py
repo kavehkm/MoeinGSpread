@@ -3,7 +3,7 @@ from threading import Event
 # internal
 from src import settings
 from .base import BaseWidget
-from src.apps import InvoiceApp
+from src.apps import InvoiceApp, CustomerApp
 # pyqt
 from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QLabel
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
@@ -74,7 +74,8 @@ class EngineWidget(BaseWidget):
     """Engine Widget"""
     def _initialize(self):
         self.engine = Engine([
-            InvoiceApp(settings.g('invoice_interval'))
+            InvoiceApp(settings.g('invoice_interval')),
+            CustomerApp(settings.g('customer_interval'))
         ])
 
     def _createWidget(self):
