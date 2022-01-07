@@ -1,7 +1,9 @@
 # internal
+from src.ui import resources
 from src.ui.widgets import EngineWidget
 # pyqt
-from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSystemTrayIcon, QMenu
 
 
 class UI(QMainWindow):
@@ -32,10 +34,40 @@ class UI(QMainWindow):
         self.generalLayout.addWidget(self.engineWidget)
 
     def _createTray(self):
-        pass
+        # tray
+        self.tray = QSystemTrayIcon(self)
+        self.tray.setIcon(QIcon(resources.get('arrow-circle-double-135.png')))
+        self.tray.setToolTip('Updater')
+        self.tray.setVisible(True)
+        # menu
+        menu = QMenu()
+        menu.addAction('Show/Hide', self.trayShowHideAction)
+        menu.addAction('Quit', self.trayQuitAction)
+        self.tray.setContextMenu(menu)
+        self.tray.activated.connect(self.trayActivatedHandler)
+
+    def trayShowHideAction(self):
+        if self.isVisible():
+            self.hide()
+        else:
+            self.showNormal()
+
+    def trayActivatedHandler(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.showNormal()
+
+    def trayQuitAction(self):
+        self.close()
+
+    def closeEvent(self, event):
+        if self.isVisible():
+            self.hide()
+            event.ignore()
+        else:
+            self.close()
 
     def _connectSignals(self):
         pass
 
     def showNotification(self, title, message):
-        pass
+        self.tray.showMessage(title, message, QSystemTrayIcon.NoIcon)
