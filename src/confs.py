@@ -15,7 +15,7 @@ GOOGLE_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.json')
 
 
 # resource dir
-RESOURCE_DIR = os.path.join(BASE_DIR, 'src/ui/resources')
+RESOURCE_DIR = os.path.join(BASE_DIR, 'resources')
 
 
 # default settings

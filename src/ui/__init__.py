@@ -1,5 +1,5 @@
 # internal
-from src.ui import resources
+from src import confs
 from src.ui.widgets import EngineWidget
 # pyqt
 from PyQt5.QtGui import QIcon
@@ -26,7 +26,9 @@ class UI(QMainWindow):
         self.generalLayout = QHBoxLayout()
         self.centWidget.setLayout(self.generalLayout)
         # title
-        self.setWindowTitle('Updater')
+        self.setWindowTitle('MGS')
+        # icon
+        self.setWindowIcon(QIcon('{}/{}'.format(confs.RESOURCE_DIR, 'gsheet.png')))
         # fix size
         self.setFixedSize(170, 75)
         # engine widget
@@ -36,8 +38,8 @@ class UI(QMainWindow):
     def _createTray(self):
         # tray
         self.tray = QSystemTrayIcon(self)
-        self.tray.setIcon(QIcon(resources.get('arrow-circle-double-135.png')))
-        self.tray.setToolTip('Updater')
+        self.tray.setIcon(QIcon('{}/{}'.format(confs.RESOURCE_DIR, 'gsheet.png')))
+        self.tray.setToolTip('MGS')
         self.tray.setVisible(True)
         # menu
         menu = QMenu()
