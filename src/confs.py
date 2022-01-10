@@ -2,6 +2,10 @@
 import os
 
 
+# app info
+APP_NAME = 'mgs'
+
+
 # project root
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,5 +31,6 @@ DEFAULT_SETTINGS = {
     'invoice_sheet': 'invoices',
     'invoice_interval': 10,
     'customer_sheet': 'customers',
-    'customer_interval': 60
+    'customer_interval': 60,
+    'engine_auto_start': False
 }
