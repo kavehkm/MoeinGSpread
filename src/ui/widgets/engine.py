@@ -72,6 +72,12 @@ class Engine(QThread):
 #################
 class EngineWidget(BaseWidget):
     """Engine Widget"""
+    def _bootstrap(self):
+        super()._bootstrap()
+        # check for auto start
+        if settings.g('engine_auto_start'):
+            self.start()
+
     def _initialize(self):
         self.engine = Engine([
             InvoiceApp(settings.g('invoice_interval')),
