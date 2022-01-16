@@ -17,6 +17,7 @@ class InvoiceModel(object):
         self.time = None
         self.tel = None
         self.address = None
+        self.code = None
         self.name = None
         self.send_time = None
         self.info = None
@@ -29,7 +30,7 @@ class InvoiceModel(object):
     def _init(self):
         sql = """
             SELECT f.FishNo, f.Date, f.Time, f.Tel, f.Address, f.MiddleMan,
-            f.SendTime, f.Info, f.JamKol, a.Name, a.Tel, a.Address
+            f.SendTime, f.Info, f.JamKol, a.Name, a.Tel, a.Address, a.Code
             FROM Factor1 AS f
             INNER JOIN AshkhasList AS a ON f.IDShakhs = a.ID
             WHERE f.ID = ? 
@@ -47,6 +48,7 @@ class InvoiceModel(object):
         self.send_time = query.value(6)
         self.info = query.value(7)
         self.total = query.value(8)
+        self.code = query.value(12)
         query.clear()
         # find invoice items
         sql = """
@@ -68,6 +70,7 @@ class InvoiceModel(object):
             self.time,
             self.tel,
             self.address,
+            self.code,
             self.name,
             self.send_time,
             self.info,
@@ -117,7 +120,7 @@ class InvoiceApp(BaseApp):
                 # if invoice exists on sheet just update
                 # otherwise append new row
                 if cell:
-                    self.sheet.update('A{}:K{}'.format(cell.row, cell.row), [invoice.serialize()])
+                    self.sheet.update('A{}:L{}'.format(cell.row, cell.row), [invoice.serialize()])
                     updated += 1
                 else:
                     self.sheet.append_row(invoice.serialize())
