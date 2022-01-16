@@ -65,3 +65,42 @@ BEGIN
     SELECT id, 2, 3
     FROM deleted
 END
+-----------------
+-- CALL-INSERT --
+-----------------
+CREATE TRIGGER MGSCallInsert
+ON Call
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO MGS(id, subject, act)
+    SELECT id, 3, 1
+    FROM inserted
+END
+-----------------
+-- CALL-UPDATE --
+-----------------
+CREATE TRIGGER MGSCallUpdate
+ON Call
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO MGS(id, subject, act)
+    SELECT id, 3, 2
+    FROM inserted
+END
+-----------------
+-- CALL-DELETE --
+-----------------
+CREATE TRIGGER MGSCallDelete
+ON Call
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO MGS(id, subject, act)
+    SELECT id, 3, 3
+    FROM deleted
+END
