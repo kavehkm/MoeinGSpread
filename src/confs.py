@@ -32,5 +32,8 @@ DEFAULT_SETTINGS = {
     'invoice_interval': 10,
     'customer_sheet': 'customers',
     'customer_interval': 60,
+    'call_sheet': 'calls',
+    'call_interval': 10,
+    'call_blacklist': [],
     'engine_auto_start': False
 }
