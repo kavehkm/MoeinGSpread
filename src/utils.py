@@ -11,3 +11,10 @@ def is_single_instance(app_name=confs.APP_NAME):
     if tasks.count(app_name.lower()) > 1:
         return False
     return True
+
+
+def split_tels(tel_string, spliter='-'):
+    try:
+        return tel_string.replace(' ', '').split(spliter)
+    except Exception:
+        return list()
