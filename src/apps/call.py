@@ -3,6 +3,8 @@ from src import sheet
 from src import settings
 from .base import BaseApp
 from src import connection
+# external
+from jdatetime import date
 
 
 class CallModel(object):
@@ -79,6 +81,7 @@ class CallApp(BaseApp):
         super().__init__(interval)
         self._sheet = None
         self.connection = connection.get('app')
+        self.blacklist = settings.g('call_blacklist')
 
     @property
     def sheet(self):
@@ -100,9 +103,14 @@ class CallApp(BaseApp):
         updated = 0
         deleted = 0
         report = list()
+        today = date.today().strftime('%Y/%m/%d')
         for call in self.get_calls():
+            # find cell
             cell = self.sheet.find(str(call.call_id), in_column=1)
-            if call.action == 1:
+            if call.date != today or call.number in self.blacklist:
+                # do nothing untill call.done()
+                pass
+            elif call.action == 1:
                 self.sheet.append_row(call.serialize())
                 inserted += 1
             elif call.action == 2:
