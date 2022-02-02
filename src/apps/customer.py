@@ -3,6 +3,7 @@ from src import sheet
 from src import settings
 from .base import BaseApp
 from src import connection
+from src.utils import split_tels
 
 
 class CustomerModel(object):
@@ -55,17 +56,10 @@ class CustomerModel(object):
         query.clear()
 
     def serialize(self):
-        tels = list()
-        try:
-            tels = self.tel.replace(' ', '').split('-')
-        except Exception:
-            pass
-
-        return [
+        record = [
             self.customer_id,
             self.code,
             self.name,
-            '\n'.join(tels) or self.tel,
             self.email,
             self.state,
             self.city,
@@ -76,6 +70,10 @@ class CustomerModel(object):
             self.info,
             self.group
         ]
+        tels = split_tels(self.tel)
+        if tels:
+            record.extend(tels)
+        return record
 
     def done(self):
         sql = "DELETE FROM MGS WHERE n = ? AND id = ?"
@@ -118,7 +116,8 @@ class CustomerApp(BaseApp):
                 inserted += 1
             elif customer.action == 2:
                 if cell:
-                    self.sheet.update('A{}:M{}'.format(cell.row, cell.row), [customer.serialize()])
+                    self.sheet.delete_row(cell.row)
+                    self.sheet.insert_row(customer.serialize(), cell.row)
                     updated += 1
                 else:
                     self.sheet.append_row(customer.serialize())

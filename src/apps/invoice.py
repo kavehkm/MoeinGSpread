@@ -3,6 +3,7 @@ from src import sheet
 from src import settings
 from .base import BaseApp
 from src import connection
+from src.utils import split_tels
 
 
 class InvoiceModel(object):
@@ -63,12 +64,11 @@ class InvoiceModel(object):
         query.clear()
 
     def serialize(self):
-        return [
+        record = [
             self.invoice_id,
             self.fishno,
             self.date,
             self.time,
-            self.tel,
             self.address,
             self.code,
             self.name,
@@ -77,6 +77,10 @@ class InvoiceModel(object):
             self.total,
             '\n'.join(['{} * {}'.format(*item) for item in self.items])
         ]
+        tels = split_tels(self.tel)
+        if tels:
+            record.extend(tels)
+        return record
 
     def done(self):
         sql = "DELETE FROM MGS WHERE n = ? AND id = ?"
@@ -120,7 +124,8 @@ class InvoiceApp(BaseApp):
                 # if invoice exists on sheet just update
                 # otherwise append new row
                 if cell:
-                    self.sheet.update('A{}:L{}'.format(cell.row, cell.row), [invoice.serialize()])
+                    self.sheet.delete_row(cell.row)
+                    self.sheet.insert_row(invoice.serialize(), cell.row)
                     updated += 1
                 else:
                     self.sheet.append_row(invoice.serialize())
