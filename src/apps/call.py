@@ -1,19 +1,12 @@
 # internal
-from src import sheet
-from src import settings
-from .base import BaseApp
-from src import connection
+from .base import BaseApp, BaseModel
 # external
 from jdatetime import date
 
 
-class CallModel(object):
+class CallModel(BaseModel):
     """Call Model"""
-    def __init__(self, connection, n, call_id, action):
-        self.connection = connection
-        self.n = n
-        self.action = action
-        self.call_id = call_id
+    def __init__(self, *args, **kwargs):
         self.date = None
         self.time = None
         self.line = None
@@ -25,9 +18,7 @@ class CallModel(object):
         self.name = None
         self.address = None
         self.username = None
-        # check for full initialize
-        if action != 3:
-            self._init()
+        super().__init__(*args, **kwargs)
 
     def _init(self):
         sql = """
@@ -35,9 +26,9 @@ class CallModel(object):
             FROM viwCallHistory
             WHERE ID = ?
         """
-        query = self.connection.execute(sql, [self.call_id])
+        query = self.connection.execute(sql, [self.model_id])
         if not query.next():
-            raise Exception('Call {} does not exists'.format(self.call_id))
+            raise Exception('Call {} does not exists'.format(self.model_id))
         # initialization
         self.date = query.value(1)
         self.time = query.value(2)
@@ -54,7 +45,7 @@ class CallModel(object):
 
     def serialize(self):
         return [
-            self.call_id,
+            self.model_id,
             self.date,
             self.time,
             self.line,
@@ -68,35 +59,16 @@ class CallModel(object):
             self.username
         ]
 
-    def done(self):
-        sql = "DELETE FROM MGS WHERE n = ? AND id = ?"
-        query = self.connection.execute(sql, [self.n, self.call_id])
-        query.clear()
-        return True
-
 
 class CallApp(BaseApp):
     """Call History App"""
-    def __init__(self, interval):
-        super().__init__(interval)
-        self._sheet = None
-        self.connection = connection.get('app')
-        self.blacklist = settings.g('call_blacklist')
+    SUBJECT = 3
+    NAME = 'Call'
+    MODEL = CallModel
 
-    @property
-    def sheet(self):
-        if self._sheet is None:
-            self._sheet = sheet.get(settings.g('call_sheet'))
-        return self._sheet
-
-    def get_calls(self):
-        sql = "SELECT n, id, act FROM MGS WHERE subject = 3 ORDER BY n"
-        query = self.connection.execute(sql)
-        calls = list()
-        while query.next():
-            calls.append(CallModel(self.connection, query.value(0), query.value(1), query.value(2)))
-        query.clear()
-        return calls
+    def __init__(self, *args, **kwargs):
+        self.blacklist = kwargs.pop('blacklist', [])
+        super().__init__(*args, **kwargs)
 
     def _do(self):
         inserted = 0
@@ -104,27 +76,22 @@ class CallApp(BaseApp):
         deleted = 0
         report = list()
         today = date.today().strftime('%Y/%m/%d')
-        for call in self.get_calls():
-            # find cell
-            cell = self.sheet.find(str(call.call_id), in_column=1)
+
+        for call in self.get_objects():
             if call.date != today or call.number in self.blacklist:
                 # do nothing untill call.done()
                 pass
             elif call.action == 1:
-                self.sheet.append_row(call.serialize())
+                self.sheets_append(call.serialize())
                 inserted += 1
             elif call.action == 2:
-                if cell:
-                    self.sheet.update('A{}:L{}'.format(cell.row, cell.row), [call.serialize()])
-                    updated += 1
-                else:
-                    self.sheet.append_row(call.serialize())
-                    inserted += 1
+                self.sheets_update(call.pk, call.serialize())
+                updated += 1
             else:
-                if cell:
-                    self.sheet.delete_row(cell.row)
-                    deleted += 1
+                self.sheets_delete(call.pk)
+                deleted += 1
             call.done()
+        # generate report
         if inserted:
             report.append('{} new call inserted'.format(inserted))
         if updated:

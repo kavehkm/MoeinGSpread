@@ -1,18 +1,11 @@
 # internal
-from src import sheet
-from src import settings
-from .base import BaseApp
-from src import connection
+from .base import BaseApp, BaseModel
 from src.utils import split_tels
 
 
-class InvoiceModel(object):
+class InvoiceModel(BaseModel):
     """Invoice Model"""
-    def __init__(self, connection, n, invoice_id, action):
-        self.connection = connection
-        self.n = n
-        self.action = action
-        self.invoice_id = invoice_id
+    def __init__(self, *args, **kwargs):
         self.fishno = None
         self.date = None
         self.time = None
@@ -24,9 +17,7 @@ class InvoiceModel(object):
         self.info = None
         self.total = None
         self.items = list()
-        # check for full initialize
-        if action != 3:
-            self._init()
+        super().__init__(*args, **kwargs)
 
     def _init(self):
         sql = """
@@ -36,9 +27,9 @@ class InvoiceModel(object):
             INNER JOIN AshkhasList AS a ON f.IDShakhs = a.ID
             WHERE f.ID = ? 
         """
-        query = self.connection.execute(sql, [self.invoice_id])
+        query = self.connection.execute(sql, [self.model_id])
         if not query.next():
-            raise Exception('Invoice {} does not exists'.format(self.invoice_id))
+            raise Exception('Invoice {} does not exists'.format(self.model_id))
         # initialization
         self.fishno = query.value(0)
         self.date = query.value(1)
@@ -58,14 +49,14 @@ class InvoiceModel(object):
             INNER JOIN KalaList AS k ON k.ID = f.IDKala
             WHERE f.FactorID = ?
         """
-        query = self.connection.execute(sql, [self.invoice_id])
+        query = self.connection.execute(sql, [self.model_id])
         while query.next():
             self.items.append([query.value(0), int(query.value(1))])
         query.clear()
 
     def serialize(self):
         record = [
-            self.invoice_id,
+            self.model_id,
             self.fishno,
             self.date,
             self.time,
@@ -82,71 +73,9 @@ class InvoiceModel(object):
             record.extend(tels)
         return record
 
-    def done(self):
-        sql = "DELETE FROM MGS WHERE n = ? AND id = ?"
-        query = self.connection.execute(sql, [self.n, self.invoice_id])
-        query.clear()
-        return True
-
 
 class InvoiceApp(BaseApp):
     """Invoice App"""
-    def __init__(self, interval):
-        super().__init__(interval)
-        self._sheet = None
-        self.connection = connection.get('app')
-
-    @property
-    def sheet(self):
-        if self._sheet is None:
-            self._sheet = sheet.get(settings.g('invoice_sheet'))
-        return self._sheet
-
-    def get_invoices(self):
-        sql = "SELECT n, id, act FROM MGS WHERE subject = 1 ORDER BY n"
-        query = self.connection.execute(sql)
-        invoices = list()
-        while query.next():
-            invoices.append(InvoiceModel(self.connection, query.value(0), query.value(1), query.value(2)))
-        query.clear()
-        return invoices
-
-    def _do(self):
-        inserted = 0
-        updated = 0
-        deleted = 0
-        report = list()
-        for invoice in self.get_invoices():
-            # find invoice on sheet
-            cell = self.sheet.find(str(invoice.invoice_id), in_column=1)
-            if invoice.action == 2:
-                # check for cell:
-                # if invoice exists on sheet just update
-                # otherwise append new row
-                if cell:
-                    self.sheet.delete_row(cell.row)
-                    self.sheet.insert_row(invoice.serialize(), cell.row)
-                    updated += 1
-                else:
-                    self.sheet.append_row(invoice.serialize())
-                    inserted += 1
-            else:
-                # check for cell if invoice exists, just delete it
-                # otherwise do nothing...
-                if cell:
-                    self.sheet.delete_row(cell.row)
-                    deleted += 1
-            # remove current invoice from MGS table
-            invoice.done()
-        # generate report
-        if inserted:
-            report.append('{} new invoice inserted'.format(inserted))
-        if updated:
-            report.append('{} invoice updated'.format(updated))
-        if deleted:
-            report.append('{} invoice deleted'.format(deleted))
-        if report:
-            return {
-                'title': 'Invoice',
-                'message': '\n'.join(report)
-            }
+    SUBJECT = 1
+    NAME = 'Invoice'
+    MODEL = InvoiceModel
