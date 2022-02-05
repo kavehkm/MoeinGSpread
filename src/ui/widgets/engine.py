@@ -79,11 +79,22 @@ class EngineWidget(BaseWidget):
             self.start()
 
     def _initialize(self):
-        self.engine = Engine([
-            InvoiceApp(settings.g('invoice_interval')),
-            CustomerApp(settings.g('customer_interval')),
-            CallApp(settings.g('call_interval'))
-        ])
+        apps = [
+            InvoiceApp(
+                settings.g('invoice_interval', 10),
+                settings.g('invoice_sheet', [])
+            ),
+            CustomerApp(
+                settings.g('customer_interval', 10),
+                settings.g('customer_sheet', [])
+            ),
+            CallApp(
+                settings.g('call_interval', 10),
+                settings.g('call_sheet', []),
+                blacklist=settings.g('call_blacklist', [])
+            )
+        ]
+        self.engine = Engine(apps)
 
     def _createWidget(self):
         # display
