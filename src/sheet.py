@@ -1,10 +1,12 @@
 # internal
 from src import confs
+
 # external
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 
+# sheets registry
 _SHEETS = dict()
 
 
