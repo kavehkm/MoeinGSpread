@@ -1,5 +1,6 @@
 # internal
 from src import settings
+
 # pyqt
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 
