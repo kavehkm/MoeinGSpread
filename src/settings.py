@@ -1,11 +1,13 @@
 # standard
 import json
+
 # internal
 from src import confs
 
 
 class API(object):
     """Settings API"""
+
     def __init__(self):
         self._settings = dict()
         self._initialize()
