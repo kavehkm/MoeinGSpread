@@ -22,6 +22,10 @@ GOOGLE_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.json')
 RESOURCE_DIR = os.path.join(BASE_DIR, 'resources')
 
 
+# default connection name
+DEFAULT_CONNECTION_NAME = 'main'
+
+
 # default settings
 DEFAULT_SETTINGS = {
     'database_server': '',
