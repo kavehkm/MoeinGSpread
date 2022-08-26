@@ -1,5 +1,5 @@
 # internal
-from src import settings
+from src import confs, settings
 
 # pyqt
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
@@ -12,11 +12,29 @@ _CONNECTIONS = dict()
 # connection wrapper
 class Connection(object):
     """Database Connection"""
-    def __init__(self, conn):
-        self._conn = conn
+    def __init__(self, name):
+        self._name = name
+        self._conn = None
+
+    @property
+    def conn(self):
+        if self._conn is None:
+            server = settings.g('database_server')
+            username = settings.g('database_username')
+            password = settings.g('database_password')
+            database = settings.g('database_name')
+            connection = QSqlDatabase.addDatabase('QODBC', self._name)
+            connection.setDatabaseName(
+                'driver={SQL Server};server=%s;database=%s;uid=%s;pwd=%s' % (
+                    server, database, username, password
+                )
+            )
+            connection.open()
+            self._conn = connection
+        return self._conn
 
     def execute(self, sql, parameters=()):
-        query = QSqlQuery(self._conn)
+        query = QSqlQuery(self.conn)
         query.prepare(sql)
         for param in parameters:
             query.addBindValue(param)
@@ -26,26 +44,9 @@ class Connection(object):
         raise Exception('Database Error: {}'.format(query_error.databaseText()))
 
 
-# create connection
-def create(connection_name):
-    server = settings.g('database_server')
-    username = settings.g('database_username')
-    password = settings.g('database_password')
-    database = settings.g('database_name')
-    connection = QSqlDatabase.addDatabase('QODBC', connection_name)
-    connection.setDatabaseName(
-        'driver={SQL Server};server=%s;database=%s;uid=%s;pwd=%s' % (
-            server, database, username, password
-        )
-    )
-    return connection.open(), connection
-
-
-# get connection
-def get(name):
+def get(name=confs.DEFAULT_CONNECTION_NAME):
     if name in _CONNECTIONS:
         return _CONNECTIONS[name]
-    _, conn = create(name)
-    connection = Connection(conn)
+    connection = Connection(name)
     _CONNECTIONS[name] = connection
     return connection
