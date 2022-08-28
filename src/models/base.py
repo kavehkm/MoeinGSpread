@@ -5,9 +5,9 @@ from src import connection
 class BaseModel(object):
     """Base Model"""
 
-    NAME = 'Base'
-    TABLE = 'BaseTable'
-    PK_FIELD = 'ID'
+    __NAME__ = 'Base'
+    __TABLE__ = 'Base_TABLE'
+    __PK_FIELD__ = 'ID'
 
     FIELDS = ()
 
@@ -20,11 +20,11 @@ class BaseModel(object):
 
     @classmethod
     def _sql_from(cls):
-        return cls.TABLE
+        return cls.__TABLE__
     
     @classmethod
     def _sql_where(cls):
-        return '{}=?'.format(cls.PK_FIELD)
+        return '{}=?'.format(cls.__PK_FIELD__)
 
     @classmethod
     def _fetch(cls, query):
@@ -63,8 +63,18 @@ class BaseModel(object):
         query = cls.connection.execute(sql, params)
         obj = cls._fetch(query)
         if obj is None:
-            raise Exception('{} with {} does not exists'.format(cls.NAME, pk))
+            raise Exception('{} with {} does not exists'.format(cls.__NAME__, pk))
         return obj
 
+    @property
+    def pk(self):
+        return getattr(self, self.__PK_FIELD__)
+
     def delete(self):
-        pass
+        sql = 'DELETE {} WHERE {}=?'.format(
+            self.__TABLE__,
+            self.__PK_FIELD__,
+        )
+        params = [self.pk]
+        query = self.connection.execute(sql, params)
+        query.clear()
