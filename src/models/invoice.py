@@ -5,6 +5,6 @@ from .base import BaseModel
 class Invoice(BaseModel):
     """Invoice Model"""
 
-    NAME = 'Invoice'
-    TABLE = 'Factor1'
-    PK_FIELD = 'ID'
+    __NAME__ = 'Invoice'
+    __TABLE__ = 'Factor1'
+    __PK_FIELD__ = 'ID'
