@@ -5,9 +5,9 @@ from .base import BaseModel
 class Call(BaseModel):
     """Call Model"""
 
-    NAME = 'Call'
-    TABLE = 'viwCallHistory'
-    PK_FIELD = 'ID'
+    __NAME__ = 'Call'
+    __TABLE__ = 'viwCallHistory'
+    __PK_FIELD__ = 'ID'
 
     ID =                0
     DATE =              1
@@ -52,3 +52,7 @@ class Call(BaseModel):
         self.customer_id = customer_id
         self.customer_name = customer_name
         self.customer_address = customer_address
+
+    @property
+    def pk(self):
+        return self.id
