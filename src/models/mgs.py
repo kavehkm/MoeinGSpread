@@ -39,3 +39,21 @@ class MGS(BaseModel):
     @property
     def pk(self):
         return self.n
+
+    @classmethod
+    def get_customers(cls):
+        sql = "SELECT * FROM {} WHERE Subject=? ORDER BY {}".format(cls.__TABLE__, cls.__PK_FIELD__)
+        query = cls.connection.execute(sql,  [cls.CUSTOMER])
+        return cls._fetch_all(query)
+
+    @classmethod
+    def get_calls(cls):
+        sql = "SELECT * FROM {} WHERE Subject=? ORDER BY {}".format(cls.__TABLE__, cls.__PK_FIELD__)
+        query = cls.connection.execute(sql, [cls.CALL])
+        return cls._fetch_all(query)
+
+    @classmethod
+    def get_invoices(cls):
+        sql = "SELECT * FROM {} WHERE Subject=? ORDER BY {}".format(cls.__TABLE__, cls.__PK_FIELD__)
+        query = cls.connection.execute(sql, [cls.INVOICE])
+        return cls._fetch_all(query)
