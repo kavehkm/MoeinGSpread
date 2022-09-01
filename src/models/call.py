@@ -39,7 +39,7 @@ class Call(BaseModel):
 
     def __init__(
         self, id, date, time, line, number, user_id, user_name,
-        accept, customer_id, customer_name, customer_address
+        accept, customer_id, customer_code, customer_name, customer_address
     ):
         self.id = id
         self.date = date
@@ -50,6 +50,7 @@ class Call(BaseModel):
         self.user_name = user_name
         self.accept = accept
         self.customer_id = customer_id
+        self.customer_code = customer_code
         self.customer_name = customer_name
         self.customer_address = customer_address
 
