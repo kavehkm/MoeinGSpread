@@ -41,19 +41,19 @@ class MGS(BaseModel):
         return self.n
 
     @classmethod
-    def get_customers(cls):
+    def filter_by_subject(cls, subject):
         sql = "SELECT * FROM {} WHERE Subject=? ORDER BY {}".format(cls.__TABLE__, cls.__PK_FIELD__)
-        query = cls.connection.execute(sql,  [cls.CUSTOMER])
+        query = cls.connection.execute(sql, [subject])
         return cls._fetch_all(query)
+
+    @classmethod
+    def get_customers(cls):
+        return cls.filter_by_subject(cls.CUSTOMER)
 
     @classmethod
     def get_calls(cls):
-        sql = "SELECT * FROM {} WHERE Subject=? ORDER BY {}".format(cls.__TABLE__, cls.__PK_FIELD__)
-        query = cls.connection.execute(sql, [cls.CALL])
-        return cls._fetch_all(query)
+        return cls.filter_by_subject(cls.CALL)
 
     @classmethod
     def get_invoices(cls):
-        sql = "SELECT * FROM {} WHERE Subject=? ORDER BY {}".format(cls.__TABLE__, cls.__PK_FIELD__)
-        query = cls.connection.execute(sql, [cls.INVOICE])
-        return cls._fetch_all(query)
+        return cls.filter_by_subject(cls.INVOICE)
