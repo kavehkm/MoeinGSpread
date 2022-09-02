@@ -3,7 +3,7 @@ from threading import Event
 # internal
 from src import settings
 from .base import BaseWidget
-from src.apps import InvoiceApp, CustomerApp, CallApp
+from src.syncers import Call, Invoice, Customer
 # pyqt
 from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QLabel
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
@@ -80,19 +80,9 @@ class EngineWidget(BaseWidget):
 
     def _initialize(self):
         apps = [
-            InvoiceApp(
-                settings.g('invoice_interval', 10),
-                settings.g('invoice_sheet', [])
-            ),
-            CustomerApp(
-                settings.g('customer_interval', 10),
-                settings.g('customer_sheet', [])
-            ),
-            CallApp(
-                settings.g('call_interval', 10),
-                settings.g('call_sheet', []),
-                blacklist=settings.g('call_blacklist', [])
-            )
+            Invoice(settings.g('invoice_interval', 10)),
+            Customer(settings.g('customer_interval', 10)),
+            Call(settings.g('call_interval', 10))
         ]
         self.engine = Engine(apps)
 
