@@ -23,6 +23,12 @@ class BaseSyncer(object):
         self._reports = []
     
     @property
+    def tracker(self):
+        if self._tracker is None:
+            self._tracker = sheet.get(self.TRACKER)
+        return self._tracker
+
+    @property
     def targets(self):
         if self._targets is None:
             self._targets = [
@@ -31,12 +37,21 @@ class BaseSyncer(object):
             ]
         return self._targets
 
-    @property
-    def tracker(self):
-        if self._tracker is None:
-            self._tracker = sheet.get(self.TRACKER)
-        return self._tracker
+    def targets_append(self, record):
+        for target in self.targets:
+            target.append(record)
+
+    def targets_update(self, pk, record):
+        for target in self.targets:
+            target.update(pk, record)
+
+    def targets_delete(self, pk):
+        for target in self.targets:
+            target.delete(pk)
     
+    def pass_log(self, log):
+        return False if log else True
+
     @staticmethod
     def filter(record):
         for i in range(len(record)):
@@ -58,24 +73,18 @@ class BaseSyncer(object):
 
     def _upload(self): 
         for log in MGS.filter_by_subject(self.SUBJECT):
-            args = ()
-            kwargs = {}
-            method = None
             # dispatch log
-            if log.act == MGS.INSERT:
+            if self.pass_log(log):
+                pass
+            elif log.act in [MGS.INSERT, MGS.UPDATE]:
                 instance = self.MODEL.get(log.id)
-                method = 'append'
-                args = (self.filter(self.serialize(instance)),)
-            elif log.act == MGS.UPDATE:
-                instance = self.MODEL.get(log.id)
-                method = 'update'
-                args = (instance.pk, self.filter(self.serialize(instance)))
+                record = self.filter(self.serialize(instance))
+                if log.act == MGS.INSERT:
+                    self.targets_append(record)
+                else:
+                    self.targets_update(instance.pk, record)
             elif log.act == MGS.DELETE:
-                method = 'delete'
-                args = (log.id,)
-            # update targets
-            for target in self.targets:
-                getattr(target, method)(*args, **kwargs)
+                self.targets_delete(log.id)
             # delete log
             log.delete()
 
