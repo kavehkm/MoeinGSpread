@@ -3,6 +3,9 @@ from src import settings
 from .base import BaseSyncer
 from src.models import Call, MGS
 
+# jdatetime
+from jdatetime import date
+
 
 class Call(BaseSyncer):
     """Call Syncer"""
@@ -26,3 +29,12 @@ class Call(BaseSyncer):
             instance.user_id,
             instance.user_name
         ]
+    
+    def pass_log(self, log):
+        if log.act == MGS.DELETE:
+            return False
+        call = self.MODEL.get(log.id)
+        today = date.today().strftime('%Y/%m/%d')
+        if call.date != today or call.number in settings.g('call_blacklist'):
+            return True
+        return False
