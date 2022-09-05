@@ -28,6 +28,15 @@ class Sheet(object):
             self._sheet = client.open(self._name).sheet1
         return self._sheet
     
+    def get_all_records(self):
+        return self.sheet.get_all_values()
+
+    def get_record(self, row):
+        return self.sheet.row_values(row)
+
+    def delete_record(self, row):
+        self.sheet.delete_row(row)
+
     def find(self, pk):
         cell = self.sheet.find(str(pk), in_column=self.pk_column)
         if not cell:
