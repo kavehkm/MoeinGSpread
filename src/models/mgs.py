@@ -47,6 +47,11 @@ class MGS(BaseModel):
         return cls._fetch_all(query)
 
     @classmethod
+    def delete_by_subject(cls, subject, id):
+        sql = "DELETE FROM {} WHERE Subject=? AND id=?".format(cls.__TABLE__)
+        query = cls.connection.execute(sql, [subject, id])
+        query.clear()
+
     def get_customers(cls):
         return cls.filter_by_subject(cls.CUSTOMER)
 
@@ -57,3 +62,15 @@ class MGS(BaseModel):
     @classmethod
     def get_invoices(cls):
         return cls.filter_by_subject(cls.INVOICE)
+
+    @classmethod
+    def delete_customers(cls, id):
+        return cls.delete_by_subject(cls.CUSTOMER, id)
+
+    @classmethod
+    def delete_calls(cls, id):
+        return cls.delete_by_subject(cls.CALL, id)
+    
+    @classmethod
+    def delete_invoices(cls, id):
+        return cls.delete_by_subject(cls.INVOICE, id)
