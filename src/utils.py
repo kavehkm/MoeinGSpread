@@ -19,3 +19,11 @@ def split_tels(tel_string, spliter='-'):
         return tel_string.replace(' ', '').split(spliter)
     except Exception:
         return list()
+
+
+def null_to_none(string):
+    return None if string.lower() == 'null' else string
+
+
+def none_to_null(value):
+    return 'NULL' if value is None else value
