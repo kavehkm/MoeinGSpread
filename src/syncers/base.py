@@ -4,6 +4,7 @@ from time import time
 # internal
 from src import sheet
 from src.models import MGS
+from src.utils import none_to_null
 
 
 class BaseSyncer(object):
@@ -54,13 +55,7 @@ class BaseSyncer(object):
 
     @staticmethod
     def filter(record):
-        for i in range(len(record)):
-            value = record[i]
-            if isinstance(value, str):
-                value = value.strip()
-            if value == '' or value is None:
-                record[i] = 'NULL'
-        return record
+        return list(map(none_to_null, record))
 
     def serialize(self, instance):
         return instance
