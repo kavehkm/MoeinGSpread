@@ -12,7 +12,8 @@ class Call(BaseSyncer):
 
     MODEL = Call
     SUBJECT = MGS.CALL
-    TARGETS = settings.g('call_sheet', [])
+    TRACKER = settings.g('call_tracker')
+    TARGETS = settings.g('call_targets', [])
 
     def serialize(self, instance):
         return [

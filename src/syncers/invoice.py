@@ -9,8 +9,9 @@ class Invoice(BaseSyncer):
     """Invoice Syncer"""
 
     MODEL = Invoice
-    TARGETS = settings.g('invoice_sheet')
     SUBJECT = MGS.INVOICE
+    TRACKER = settings.g('invoice_tracker')
+    TARGETS = settings.g('invoice_targets', [])
 
     def serialize(self, instance):
         record = [
