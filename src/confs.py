@@ -32,11 +32,17 @@ DEFAULT_SETTINGS = {
     'database_username': '',
     'database_password': '',
     'database_name': '',
-    'invoice_sheet': ['invoices'],
+
+    'invoice_targets': ['invoices'],
+    'invoice_tracker': 'invoice_tracker',
     'invoice_interval': 10,
-    'customer_sheet': ['customers'],
+
+    'customer_targets': ['customers'],
+    'customer_tracker': 'customer_tracker',
     'customer_interval': 60,
-    'call_sheet': ['calls'],
+
+    'call_targets': ['calls'],
+    'call_tracker': 'call_tracker',
     'call_interval': 10,
     'call_blacklist': [],
     'engine_auto_start': False
