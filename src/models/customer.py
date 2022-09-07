@@ -82,3 +82,70 @@ class Customer(BaseModel):
     @property
     def pk(self):
         return self.id
+
+    def set_group(self, group_name):
+        # find group by name
+        group = None
+        sql = "SELECT ID FROM GroupAshkhas WHERE Caption='{}';".format(group_name)
+        query = self.connection.execute(sql)
+        if query.next():
+            group = query.value(0)
+        query.clear()
+        # if group exists update current customer
+        if group is not None:
+            sql = "UPDATE AshkhasList SET GroupID=? WHERE ID=?"
+            self.connection.execute(sql, [group, self.id])
+            query.clear()
+
+    def set_tels(self, tels):
+        # find current tels
+        current_tels = []
+        sql = "SELECT Tel FROM AshkhasTel WHERE IDShakhs=?"
+        query = self.connection.execute(sql, [self.id])
+        while query.next():
+            current_tels.append(query.value(0))
+        query.clear()
+        # calculate new and deleted tels
+        new_tels = list(set(tels) - set(current_tels))
+        deleted_tels = list(set(current_tels) - set(tels))
+        # check for new
+        if new_tels:
+            sql = "INSERT INTO AshkhasTel(IDShakhs, Caption, Tel) VALUES(?, 'تلفن', ?);"
+            for tel in new_tels:
+                query = self.connection.execute(sql, [self.id, tel])
+            query.clear()
+
+        if deleted_tels:
+            sql = "DELETE FROM AshkhasTel WHERE IDShakhs=? AND Tel=?"
+            for tel in deleted_tels:
+                query = self.connection.execute(sql, [self.id, tel])
+            query.clear()
+
+    def update(self, data):
+        # update group
+        self.set_group(data['group_name'])
+        # update tels
+        self.set_tels(data['tels'])
+        # collect fields
+        fields = {
+            'Name': data['name'],
+            'Email': data['email'],
+            'State': data['state'],
+            'City': data['city'],
+            'Address': data['address'],
+            'Posti': data['post_code'],
+            'Company': data['company'],
+            'CompanyAddress': data['company_address'],
+            'Tel': '-'.join(data['tels']),
+            'Info': data['info']
+        }
+        params = []
+        sql = "UPDATE {} SET ".format(self.__TABLE__)
+        for field, value in fields.items():
+            sql += "{}=?, ".format(field)
+            params.append(value)
+        sql = sql.rstrip(', ')
+        sql += " WHERE ID=?;"
+        params.append(self.id)
+        query = self.connection.execute(sql, params)
+        query.clear()
