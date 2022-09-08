@@ -12,22 +12,26 @@ class Customer(BaseModel):
     ID =                0
     CODE =              1
     PREFIX =            2
-    NAME =              3
-    EMAIL =             4
-    STATE =             5
-    CITY =              6
-    ADDRESS =           7
-    POST_CODE =         8
-    COMPANY =           9
-    COMPANY_ADDRESS =   10
-    TELS =              11
-    INFO =              12
-    GROUP_NAME =        13
+    FIRST_NAME =        3
+    LAST_NAME =         4
+    NAME =              5
+    EMAIL =             6
+    STATE =             7
+    CITY =              8
+    ADDRESS =           9
+    POST_CODE =         10
+    COMPANY =           11
+    COMPANY_ADDRESS =   12
+    TELS =              13
+    INFO =              14
+    GROUP_NAME =        15
 
     FIELDS = (
         ID,
         CODE,
         PREFIX,
+        FIRST_NAME,
+        LAST_NAME,
         NAME,
         EMAIL,
         STATE,
@@ -42,12 +46,14 @@ class Customer(BaseModel):
     )
 
     def __init__(
-        self, id, code, name, prefix, email, state, city, address,
-        post_code, company, company_address, tels, info, group_name
+        self, id, code, prefix, first_name, last_name, name, email, state,
+        city, address, post_code, company, company_address, tels, info, group_name
     ):
         self.id = id
         self.code = code
         self.prefix = prefix
+        self.first_name = first_name
+        self.last_name = last_name
         self.name = name
         self.email = email
         self.state = state
@@ -63,7 +69,7 @@ class Customer(BaseModel):
     @staticmethod
     def _sql_select():
         return """
-            a.ID, a.Code, a.Name, a.Prefix, a.Email, a.State, a.City,
+            a.ID, a.Code, a.Prefix, a.Fname, a.LName, a.Name, a.Email, a.State, a.City,
             a.Address, a.Posti, a.Company, a.CompanyAddress, a.Tel, a.Info, g.Caption
         """
 
@@ -82,6 +88,14 @@ class Customer(BaseModel):
     @property
     def pk(self):
         return self.id
+
+    def set_prefix(self, prefix):
+        if prefix not in ['آقای', 'اقای', 'خانم']:
+            return
+        sql = "UPDATE AshkhasList SET Prefix=? WHERE ID=?"
+        query = self.connection.execute(sql, [prefix, self.id])
+        query.clear()
+        return prefix
 
     def set_group(self, group_name):
         # find group by name
@@ -122,13 +136,18 @@ class Customer(BaseModel):
             query.clear()
 
     def update(self, data):
+        # update prefix
+        prefix = self.set_prefix(data['prefix']) or self.prefix
         # update group
         self.set_group(data['group_name'])
         # update tels
         self.set_tels(data['tels'])
         # collect fields
+        name = ' '.join(list(filter(lambda s: s, [prefix, data['first_name'], data['last_name']])))
         fields = {
-            'Name': data['name'],
+            'Fname': data['first_name'],
+            'LName': data['last_name'],
+            'Name': name,
             'Email': data['email'],
             'State': data['state'],
             'City': data['city'],
