@@ -17,7 +17,9 @@ class Customer(BaseSyncer):
         record = [
             instance.id,
             instance.code,
-            instance.name,
+            instance.prefix,
+            instance.first_name,
+            instance.last_name,
             instance.email,
             instance.state,
             instance.city,
@@ -43,17 +45,19 @@ class Customer(BaseSyncer):
             data = {
                 'id': record[0],
                 'code': record[1],
-                'name': record[2],
-                'email': record[3],
-                'state': record[4],
-                'city': record[5],
-                'address': record[6],
-                'post_code': record[7],
-                'company': record[8],
-                'company_address': record[9],
-                'info': record[10],
-                'group_name': record[11],
-                'tels': [tel for tel in record[12:] if tel]
+                'prefix': record[2],
+                'first_name': record[3],
+                'last_name': record[4],
+                'email': record[5],
+                'state': record[6],
+                'city': record[7],
+                'address': record[8],
+                'post_code': record[9],
+                'company': record[10],
+                'company_address': record[11],
+                'info': record[12],
+                'group_name': record[13],
+                'tels': [tel for tel in record[14:] if tel]
             }
             # find customer and update
             customer = self.MODEL.get(data['id'])
