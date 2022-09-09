@@ -90,8 +90,8 @@ class Customer(BaseModel):
         return self.id
 
     def set_prefix(self, prefix):
-        if prefix not in ['آقای', 'اقای', 'خانم']:
-            return
+        if prefix not in ['آقای', 'اقای', 'آقاي', 'خانم', 'شرکت', '']:
+            return None
         sql = "UPDATE AshkhasList SET Prefix=? WHERE ID=?"
         query = self.connection.execute(sql, [prefix, self.id])
         query.clear()
@@ -106,7 +106,7 @@ class Customer(BaseModel):
             group = query.value(0)
         query.clear()
         # if group exists update current customer
-        if group is not None:
+        if group is not None or group_name == '':
             sql = "UPDATE AshkhasList SET GroupID=? WHERE ID=?"
             self.connection.execute(sql, [group, self.id])
             query.clear()
@@ -137,7 +137,9 @@ class Customer(BaseModel):
 
     def update(self, data):
         # update prefix
-        prefix = self.set_prefix(data['prefix']) or self.prefix
+        prefix = self.set_prefix(data['prefix'])
+        if prefix is None:
+            prefix = self.prefix
         # update group
         self.set_group(data['group_name'])
         # update tels
