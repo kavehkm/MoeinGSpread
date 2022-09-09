@@ -43,22 +43,36 @@ class Customer(BaseSyncer):
             # get updated record, clean and collect data
             record = list(map(null_to_none, target.get_record(log[0])))
             data = {
-                'id': record[0],
-                'code': record[1],
-                'prefix': record[2],
-                'first_name': record[3],
-                'last_name': record[4],
-                'email': record[5],
-                'state': record[6],
-                'city': record[7],
-                'address': record[8],
-                'post_code': record[9],
-                'company': record[10],
-                'company_address': record[11],
-                'info': record[12],
-                'group_name': record[13],
-                'tels': [tel for tel in record[14:] if tel]
+                'id': 0,
+                'code': 1,
+                'prefix': 2,
+                'first_name': 3,
+                'last_name': 4,
+                'email': 5,
+                'state': 6,
+                'city': 7,
+                'address': 8,
+                'post_code': 9,
+                'company': 10,
+                'company_address': 11,
+                'info': 12,
+                'group_name': 13
             }
+            for key, value in data.items():
+                try:
+                    data[key] = record[value]
+                except Exception:
+                    data[key] = ''
+            # - get tels
+            tels = []
+            try:
+                for tel in record[14:]:
+                    if tel:
+                        tels.append(tel)
+            except Exception:
+                pass
+            data['tels'] = tels
+
             # find customer and update
             customer = self.MODEL.get(data['id'])
             customer.update(data)
