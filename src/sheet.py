@@ -60,6 +60,9 @@ class Sheet(object):
             return
         self.sheet.delete_row(row)
 
+    def set(self, range_str, records):
+        self.sheet.update(range_str, records)
+
     def __str__(self):
         return self._name
 
