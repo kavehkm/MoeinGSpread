@@ -45,5 +45,11 @@ DEFAULT_SETTINGS = {
     'call_tracker': 'call_tracker',
     'call_interval': 10,
     'call_blacklist': [],
+
+    'radyab_targets': ['couriers'],
+    'radyab_interval': 10,
+    'radyab_version': 1.0,
+    'radyab_key': '',
+
     'engine_auto_start': False
 }
