@@ -63,6 +63,9 @@ class Sheet(object):
     def set(self, range_str, records):
         self.sheet.update(range_str, records)
 
+    def insert(self, records, row=1):
+        self.sheet.insert_rows(records, row)
+
     def __str__(self):
         return self._name
 
