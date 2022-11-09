@@ -79,24 +79,16 @@ class Radyab(BaseSyncer):
             name = courier['name']
             location = locations.get(imei)
 
+            lat = location.get('lat', 0)
+            long = location.get('lng', 0)
+            altitude = location.get('altitude', 0)
+            angle = location.get('angle', 0)
+            speed = location.get('speed', 0)
+            date, time = location.get('dt_server', '- -').split(' ')
             # check for location
             if location is not None:
-                records1.append([
-                    imei,
-                    name,
-                    location.get('lat', 0),
-                    location.get('lng', 0),
-                    location.get('altitude', 0),
-                    location.get('angle', 0),
-                    location.get('speed', 0),
-                    location.get('dt_server', '-')
-                ])
-                records2.append(
-                    name,
-                    location.get('lat', 0),
-                    location.get('lng', 0),
-                    location.get('dt_server', '-')
-                )
+                records1.append([imei, name, lat, long, altitude, angle, speed, date, time])
+                records2.extend([name, lat, long, date, time])
 
         self.sheet1.set('A2:I20', records1)
-        self.sheet2.insert(records2)
+        self.sheet2.insert(records2, 2)
