@@ -1,4 +1,5 @@
 # internal
+from src import sheet
 from src import settings
 from .base import BaseSyncer
 
@@ -48,30 +49,54 @@ class Radyab(BaseSyncer):
             settings.g('radyab_version'),
             settings.g('radyab_key')
         )
+        self._sheet1 = None
+        self._sheet2 = None
 
-    def targets_set(self, range_str, records):
-        for target in self.targets:
-            target.set(range_str, records)
+    @property
+    def sheet1(self):
+        if self._sheet1 is None:
+            self._sheet1 = sheet.get(self.TARGETS[0])
+        return self._sheet1
+
+    @property
+    def sheet2(self):
+        if self._sheet2 is None:
+            self._sheet2 = sheet.get(self.TARGETS[1])
+        return self._sheet2
     
     def _upload(self):
         couriers = self.api.all_couriers()
         ids = [courier['imei'] for courier in couriers]
+        ids.insert(0, 'placeholder!')
+
         locations = self.api.get_courier_last_location(ids)
 
-        records = []
+        records1 = []
+        records2 = []
 
         for courier in couriers:
             imei = courier['imei']
             name = courier['name']
-            location = locations.get(imei, {})
-            records.append([
-                imei,
-                name,
-                location.get('lat', 0),
-                location.get('lng', 0),
-                location.get('altitude', 0),
-                location.get('angle', 0),
-                location.get('speed', 0)
-            ])
-        
-        self.targets_set('A2:I20', records)
+            location = locations.get(imei)
+
+            # check for location
+            if location is not None:
+                records1.append([
+                    imei,
+                    name,
+                    location.get('lat', 0),
+                    location.get('lng', 0),
+                    location.get('altitude', 0),
+                    location.get('angle', 0),
+                    location.get('speed', 0),
+                    location.get('dt_server', '-')
+                ])
+                records2.append(
+                    name,
+                    location.get('lat', 0),
+                    location.get('lng', 0),
+                    location.get('dt_server', '-')
+                )
+
+        self.sheet1.set('A2:I20', records1)
+        self.sheet2.insert(records2)
